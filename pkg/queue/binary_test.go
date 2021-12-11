@@ -1,7 +1,7 @@
 package queue
 
 import (
-	"sched/types"
+	"sched/pkg/types"
 	"testing"
 	"time"
 )

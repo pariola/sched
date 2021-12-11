@@ -1,6 +1,8 @@
 package queue
 
-import "sched/types"
+import (
+	"sched/pkg/types"
+)
 
 // Queue
 type Queue interface {
