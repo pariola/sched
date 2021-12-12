@@ -11,11 +11,16 @@ type bh struct {
 
 	// jobs
 	jobs []types.Job
+
+	// hChanged signals on head change
+	hChanged chan struct{}
 }
 
 // New returns an instance of the binary heap
 func NewBH() Queue {
-	return &bh{}
+	return &bh{
+		hChanged: make(chan struct{}, 1),
+	}
 }
 
 // satisfyMinInvariant compares parent and child to verify min heap invariant
@@ -37,6 +42,9 @@ func (h *bh) Enqueue(job types.Job) {
 	// queue job
 	h.jobs = append(h.jobs, job)
 
+	// head
+	head := h.jobs[0]
+
 	// bubble-up
 	pos := len(h.jobs) - 1
 
@@ -55,6 +63,14 @@ func (h *bh) Enqueue(job types.Job) {
 
 		// update position
 		pos = ppos
+	}
+
+	// signal on head change
+	if head != h.jobs[0] {
+		select {
+		case h.hChanged <- struct{}{}:
+		case <-h.hChanged:
+		}
 	}
 }
 
@@ -123,4 +139,9 @@ func (h *bh) Peek() *types.Job {
 	}
 
 	return &h.jobs[0]
+}
+
+// OnHeadChange returns a channel to listen to queue head change events
+func (h *bh) OnHeadChange() <-chan struct{} {
+	return h.hChanged
 }

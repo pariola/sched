@@ -6,9 +6,16 @@ import (
 	"time"
 )
 
+// newBH returns basic instance of the bh struct
+func newBH() *bh {
+	return &bh{
+		hChanged: make(chan struct{}, 1),
+	}
+}
+
 func TestBHEnqueue(t *testing.T) {
 
-	var q bh
+	q := newBH()
 
 	now := time.Now()
 
@@ -49,7 +56,7 @@ func TestBHEnqueue(t *testing.T) {
 
 func TestBHDequeue(t *testing.T) {
 
-	var q bh
+	q := newBH()
 
 	now := time.Now()
 
@@ -110,5 +117,29 @@ func TestSatisfyHeapInvariant(t *testing.T) {
 
 	if !satisfyMinInvariant(parent, child) {
 		t.Fatal("min heap invariant should be satisfied")
+	}
+}
+
+func TestBHOnHeadChange(t *testing.T) {
+
+	q := newBH()
+
+	enq := make(chan struct{})
+
+	go func() {
+		now := time.Now()
+
+		q.Enqueue(types.Job{Id: 0, When: now.Add(7 * time.Second)})
+		q.Enqueue(types.Job{Id: 1, When: now.Add(3 * time.Second)})
+
+		enq <- struct{}{}
+	}()
+
+	<-enq
+
+	select {
+	case <-q.hChanged:
+	default:
+		t.Fatal("head change not triggered")
 	}
 }

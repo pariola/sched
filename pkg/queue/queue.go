@@ -10,4 +10,5 @@ type Queue interface {
 	Enqueue(types.Job)
 	Dequeue() *types.Job
 	Peek() *types.Job
+	OnHeadChange() <-chan struct{}
 }
