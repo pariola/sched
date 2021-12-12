@@ -13,6 +13,11 @@ type bh struct {
 	jobs []types.Job
 }
 
+// New returns an instance of the binary heap
+func NewBH() Queue {
+	return &bh{}
+}
+
 // satisfyMinInvariant compares parent and child to verify min heap invariant
 func satisfyMinInvariant(parent, child types.Job) bool {
 	return parent.When.Before(child.When)
@@ -104,4 +109,18 @@ func (h *bh) Dequeue() *types.Job {
 	}
 
 	return &head
+}
+
+// Peek returns the next enqueued job without removing it from queue
+func (h *bh) Peek() *types.Job {
+
+	h.m.Lock()
+	defer h.m.Unlock()
+
+	// no jobs
+	if len(h.jobs) < 1 {
+		return nil
+	}
+
+	return &h.jobs[0]
 }

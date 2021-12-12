@@ -9,4 +9,5 @@ type Queue interface {
 	Size() int
 	Enqueue(types.Job)
 	Dequeue() *types.Job
+	Peek() *types.Job
 }
