@@ -6,8 +6,10 @@ import (
 	"time"
 )
 
+// Sink actor
 type Sink func(int, *types.Job)
 
+// backend
 type backend struct {
 
 	// q the pending jobs queue
@@ -23,6 +25,7 @@ type backend struct {
 	workerStopC []chan struct{}
 }
 
+// New returns an instance of backend
 func New() *backend {
 
 	b := &backend{
@@ -78,7 +81,7 @@ func worker(id int, jobs chan *types.Job, stopC chan struct{}, sink Sink) {
 	}
 }
 
-// Sink creates neccessary workers
+// Sink creates n workers with sink actor
 func (b *backend) Sink(n int, sink Sink) {
 	b.workerStopC = make([]chan struct{}, n)
 
@@ -88,7 +91,7 @@ func (b *backend) Sink(n int, sink Sink) {
 	}
 }
 
-// Stop signals the scheduler to stop draining jobs
+// Stop signals the scheduler and workers to stop
 func (b *backend) Stop() {
 
 	// stop drain
@@ -105,15 +108,15 @@ func (b *backend) Stop() {
 	close(b.jobs)
 }
 
-// CreateJob enqueues a new pending job
+// CreateJob creates a new job
 func (b *backend) CreateJob(job *types.Job) {
 	b.q.Enqueue(job)
 }
 
-// UpdateJob
+// UpdateJob updates a pending job
 func (b *backend) UpdateJob(id int64) {
 }
 
-// CancelJob
+// CancelJob cancels a pending job
 func (b *backend) CancelJob(id int64) {
 }
