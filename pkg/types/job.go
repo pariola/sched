@@ -9,3 +9,7 @@ type Job struct {
 
 	When time.Time `json:"when"`
 }
+
+func NewJob(id int64, when time.Time) *Job {
+	return &Job{Id: id, When: when}
+}

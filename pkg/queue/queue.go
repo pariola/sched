@@ -7,7 +7,7 @@ import (
 // Queue
 type Queue interface {
 	Size() int
-	Enqueue(types.Job)
+	Enqueue(*types.Job)
 	Dequeue() *types.Job
 	Peek() *types.Job
 	OnHeadChange() <-chan struct{}

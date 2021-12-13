@@ -19,16 +19,16 @@ func TestBHEnqueue(t *testing.T) {
 
 	now := time.Now()
 
-	jobs := []types.Job{
-		{Id: 3, When: now.Add(3 * time.Second)},
-		{Id: 4, When: now.Add(4 * time.Second)},
-		{Id: 31, When: now.Add(31 * time.Second)},
-		{Id: 5, When: now.Add(5 * time.Second)},
-		{Id: 2, When: now.Add(2 * time.Second)},
+	jobs := []*types.Job{
+		types.NewJob(3, now.Add(3*time.Second)),
+		types.NewJob(4, now.Add(4*time.Second)),
+		types.NewJob(31, now.Add(31*time.Second)),
+		types.NewJob(5, now.Add(5*time.Second)),
+		types.NewJob(2, now.Add(2*time.Second)),
 	}
 
 	// 2, 3, 31, 5, 4
-	expected := []types.Job{
+	expected := []*types.Job{
 		jobs[4], jobs[0], jobs[2], jobs[3], jobs[1],
 	}
 
@@ -60,16 +60,16 @@ func TestBHDequeue(t *testing.T) {
 
 	now := time.Now()
 
-	jobs := []types.Job{
-		{Id: 3, When: now.Add(3 * time.Second)},
-		{Id: 4, When: now.Add(4 * time.Second)},
-		{Id: 31, When: now.Add(31 * time.Second)},
-		{Id: 5, When: now.Add(5 * time.Second)},
-		{Id: 2, When: now.Add(2 * time.Second)},
+	jobs := []*types.Job{
+		types.NewJob(3, now.Add(3*time.Second)),
+		types.NewJob(4, now.Add(4*time.Second)),
+		types.NewJob(31, now.Add(31*time.Second)),
+		types.NewJob(5, now.Add(5*time.Second)),
+		types.NewJob(2, now.Add(2*time.Second)),
 	}
 
 	// 2, 3, 4, 5, 31
-	expectedOrder := []types.Job{
+	expectedOrder := []*types.Job{
 		jobs[4], jobs[0], jobs[1], jobs[3], jobs[2],
 	}
 
@@ -87,7 +87,7 @@ func TestBHDequeue(t *testing.T) {
 			t.Fatalf("job should not be nil")
 		}
 
-		if *head != expectedOrder[i] {
+		if head != expectedOrder[i] {
 			t.Fatalf("order of jobs invalid, expected id %d got %d", expectedOrder[i].Id, head.Id)
 		}
 	}
@@ -101,19 +101,19 @@ func TestSatisfyHeapInvariant(t *testing.T) {
 
 	now := time.Now()
 
-	var child, parent types.Job
+	var child, parent *types.Job
 
 	// fail
-	child = types.Job{Id: 1, When: now}
-	parent = types.Job{Id: 1, When: now.Add(time.Second)}
+	child = types.NewJob(1, now)
+	parent = types.NewJob(1, now.Add(time.Second))
 
 	if satisfyMinInvariant(parent, child) {
 		t.Fatal("min heap invariant should not satisfied")
 	}
 
 	// success
-	child = types.Job{Id: 1, When: now.Add(time.Second)}
-	parent = types.Job{Id: 1, When: now}
+	child = types.NewJob(1, now.Add(time.Second))
+	parent = types.NewJob(1, now)
 
 	if !satisfyMinInvariant(parent, child) {
 		t.Fatal("min heap invariant should be satisfied")
@@ -129,8 +129,8 @@ func TestBHOnHeadChange(t *testing.T) {
 	go func() {
 		now := time.Now()
 
-		q.Enqueue(types.Job{Id: 0, When: now.Add(7 * time.Second)})
-		q.Enqueue(types.Job{Id: 1, When: now.Add(3 * time.Second)})
+		q.Enqueue(types.NewJob(0, now.Add(7*time.Second)))
+		q.Enqueue(types.NewJob(1, now.Add(3*time.Second)))
 
 		enq <- struct{}{}
 	}()

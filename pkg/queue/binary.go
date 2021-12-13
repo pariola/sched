@@ -10,7 +10,7 @@ type bh struct {
 	m sync.Mutex
 
 	// jobs
-	jobs []types.Job
+	jobs []*types.Job
 
 	// hChanged signals on head change
 	hChanged chan struct{}
@@ -24,7 +24,7 @@ func NewBH() Queue {
 }
 
 // satisfyMinInvariant compares parent and child to verify min heap invariant
-func satisfyMinInvariant(parent, child types.Job) bool {
+func satisfyMinInvariant(parent, child *types.Job) bool {
 	return parent.When.Before(child.When)
 }
 
@@ -34,7 +34,7 @@ func (h *bh) Size() int {
 }
 
 // Enqueue enqueues a job
-func (h *bh) Enqueue(job types.Job) {
+func (h *bh) Enqueue(job *types.Job) {
 
 	h.m.Lock()
 	defer h.m.Unlock()
@@ -124,7 +124,7 @@ func (h *bh) Dequeue() *types.Job {
 		pos = child
 	}
 
-	return &head
+	return head
 }
 
 // Peek returns the next enqueued job without removing it from queue
@@ -138,7 +138,7 @@ func (h *bh) Peek() *types.Job {
 		return nil
 	}
 
-	return &h.jobs[0]
+	return h.jobs[0]
 }
 
 // OnHeadChange returns a channel to listen to queue head change events
