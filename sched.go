@@ -1,22 +1,21 @@
 package sched
 
 import (
-	"sched/pkg/queue"
-	"sched/pkg/types"
 	"time"
+
+	"github.com/pariola/sched/pkg/queue"
 )
 
 // Sink actor
-type Sink func(int, *types.Job)
+type Sink func(id int, job *queue.Job)
 
 // backend
 type backend struct {
-
 	// q the pending jobs queue
 	q queue.Queue
 
 	// jobs the processing queue
-	jobs chan *types.Job
+	jobs chan *queue.Job
 
 	// stopDrainC the stop signal channel for drain-ing jobs from q
 	stopDrainC chan struct{}
@@ -26,12 +25,11 @@ type backend struct {
 }
 
 // New returns an instance of backend
-func New() *backend {
-
+func New(q queue.Queue) *backend {
 	b := &backend{
-		q:          queue.NewBH(),
+		q:          q,
 		stopDrainC: make(chan struct{}),
-		jobs:       make(chan *types.Job, 1000),
+		jobs:       make(chan *queue.Job, 1000),
 	}
 
 	// drain
@@ -43,6 +41,7 @@ func New() *backend {
 				continue
 			}
 
+			// block until the head's scheduled time
 			timer := time.NewTimer(
 				time.Until(head.When),
 			)
@@ -51,16 +50,18 @@ func New() *backend {
 			case <-timer.C:
 				timer.Stop()
 				head = b.q.Dequeue()
+
 			case <-b.stopDrainC:
 				timer.Stop()
 				return
+
+				// break out as soon as head changes
 			case <-b.q.OnHeadChange():
 				timer.Stop()
 				continue
 			}
 
-			// send to processing queue
-			b.jobs <- head
+			b.jobs <- head // send to processing queue
 
 			time.Sleep(10 * time.Millisecond)
 		}
@@ -70,7 +71,7 @@ func New() *backend {
 }
 
 // worker
-func worker(id int, jobs chan *types.Job, stopC chan struct{}, sink Sink) {
+func worker(id int, jobs chan *queue.Job, stopC chan struct{}, sink Sink) {
 	for {
 		select {
 		case <-stopC:
@@ -93,9 +94,7 @@ func (b *backend) Sink(n int, sink Sink) {
 
 // Stop signals the scheduler and workers to stop
 func (b *backend) Stop() {
-
-	// stop drain
-	b.stopDrainC <- struct{}{}
+	b.stopDrainC <- struct{}{} // stop drain
 	close(b.stopDrainC)
 
 	// stop workers
@@ -104,19 +103,15 @@ func (b *backend) Stop() {
 		close(c)
 	}
 
-	// close processing queue
-	close(b.jobs)
+	close(b.jobs) // close processing queue
 }
 
 // CreateJob creates a new job
-func (b *backend) CreateJob(job *types.Job) {
+func (b *backend) CreateJob(job *queue.Job) {
 	b.q.Enqueue(job)
-}
-
-// UpdateJob updates a pending job
-func (b *backend) UpdateJob(id int64) {
 }
 
 // CancelJob cancels a pending job
 func (b *backend) CancelJob(id int64) {
+	panic("not implemented")
 }

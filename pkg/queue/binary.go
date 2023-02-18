@@ -1,30 +1,27 @@
 package queue
 
-import (
-	"sched/pkg/types"
-	"sync"
-)
+import "sync"
 
 // bh - binary heap
 type bh struct {
 	m sync.Mutex
 
 	// jobs
-	jobs []*types.Job
+	jobs []*Job
 
 	// hChanged signals on head change
 	hChanged chan struct{}
 }
 
 // New returns an instance of the binary heap
-func NewBH() Queue {
+func Binary() *bh {
 	return &bh{
 		hChanged: make(chan struct{}, 1),
 	}
 }
 
 // satisfyMinInvariant compares parent and child to verify min heap invariant
-func satisfyMinInvariant(parent, child *types.Job) bool {
+func satisfyMinInvariant(parent, child *Job) bool {
 	return parent.When.Before(child.When)
 }
 
@@ -34,8 +31,7 @@ func (h *bh) Size() int {
 }
 
 // Enqueue enqueues a job
-func (h *bh) Enqueue(job *types.Job) {
-
+func (h *bh) Enqueue(job *Job) {
 	h.m.Lock()
 	defer h.m.Unlock()
 
@@ -46,10 +42,7 @@ func (h *bh) Enqueue(job *types.Job) {
 	head := h.jobs[0]
 
 	// bubble-up
-	pos := len(h.jobs) - 1
-
-	for pos > 0 {
-
+	for pos := len(h.jobs) - 1; pos > 0; {
 		// parent position
 		ppos := (pos - 1) / 2
 
@@ -75,8 +68,7 @@ func (h *bh) Enqueue(job *types.Job) {
 }
 
 // Dequeue returns the next enqueued job
-func (h *bh) Dequeue() *types.Job {
-
+func (h *bh) Dequeue() *Job {
 	h.m.Lock()
 	defer h.m.Unlock()
 
@@ -128,8 +120,7 @@ func (h *bh) Dequeue() *types.Job {
 }
 
 // Peek returns the next enqueued job without removing it from queue
-func (h *bh) Peek() *types.Job {
-
+func (h *bh) Peek() *Job {
 	h.m.Lock()
 	defer h.m.Unlock()
 

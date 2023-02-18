@@ -1,13 +1,10 @@
-package types
+package queue
 
-import (
-	"time"
-)
+import "time"
 
 type Job struct {
-	Id int64 `json:"id"`
-
-	When time.Time `json:"when"`
+	Id   int64
+	When time.Time
 }
 
 func NewJob(id int64, when time.Time) *Job {
