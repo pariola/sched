@@ -17,11 +17,11 @@ func main() {
 		N: 10,
 		Q: queue.BinaryHeap(),
 		Sink: func(id int, job sched.Job) {
-      fmt.Printf("by worker: %d | message: %s\n", id, job.Msg)
+			fmt.Printf("by worker: %d | message: %s\n", id, job.Msg)
 		},
 	})
 
-  now := time.Now()
+	now := time.Now()
 
 	// queue messages
 	for i := 0; i < 5; i++ {
@@ -37,7 +37,9 @@ func main() {
 	s.CancelJob(jobOneId)
 }
 ```
+
 Result:
+
 ```txt
 by worker: 9 | message: You rock!
 by worker: 4 | message: msg 3
@@ -46,4 +48,3 @@ by worker: 6 | message: msg 1
 by worker: 7 | message: msg 2
 by worker: 8 | message: msg 4
 ```
-
